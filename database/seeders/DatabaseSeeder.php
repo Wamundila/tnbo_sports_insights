@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (app()->environment(['local', 'testing'])) {
+            User::query()->firstOrCreate(
+                ['email' => 'admin@tnbo.test'],
+                [
+                    'name' => 'TNBO Admin',
+                    'password' => bcrypt('password'),
+                ]
+            );
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $this->call(InsightsStarterSeeder::class);
     }
 }
