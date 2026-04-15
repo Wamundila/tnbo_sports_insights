@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         if (app()->environment(['local', 'testing'])) {
             User::query()->firstOrCreate(
-                ['email' => 'admin@tnbo.test'],
+                ['email' => 'chilandosongwe@gmail.com'],
                 [
-                    'name' => 'TNBO Admin',
-                    'password' => bcrypt('password'),
+                    'name' => 'Wamundila',
+                    'password' => bcrypt('Xpat7007!!'),
                 ]
             );
         }
