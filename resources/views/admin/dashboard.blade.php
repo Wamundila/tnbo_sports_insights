@@ -152,6 +152,11 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="alert alert-light border rounded-4 mt-3 mb-0 small text-secondary">
+                    <strong>How to read this:</strong> Views count screen activity. Users count distinct people for that
+                    surface in the selected dates. DAU, WAU and MAU are separate active-user totals across the whole app
+                    window, so they will not always match a single surface row.
+                </div>
             </div>
         </div>
         <div class="col-xl-6">

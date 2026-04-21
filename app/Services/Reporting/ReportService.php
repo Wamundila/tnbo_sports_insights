@@ -72,7 +72,15 @@ class ReportService
                 ->groupBy('service', 'surface')
                 ->orderByDesc('screen_views')
                 ->limit(10)
-                ->get(),
+                ->get()
+                ->map(function ($surface) use ($from, $to) {
+                    $surface->unique_users = $this->uniqueUsersInRange($from, $to, [
+                        'service' => $surface->service,
+                        'surface' => $surface->surface,
+                    ]);
+
+                    return $surface;
+                }),
             'top_blocks' => (clone $blockQuery)
                 ->select('service', 'surface', 'block_id', 'placement_id')
                 ->selectRaw('SUM(block_views) as block_views')

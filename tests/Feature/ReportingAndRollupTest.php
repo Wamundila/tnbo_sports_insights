@@ -257,7 +257,9 @@ class ReportingAndRollupTest extends TestCase
             ->assertOk()
             ->assertJsonPath('summary.screen_views', 1)
             ->assertJsonPath('summary.unique_users', 2)
-            ->assertJsonPath('active_users.dau', 2);
+            ->assertJsonPath('active_users.dau', 2)
+            ->assertJsonPath('top_surfaces.0.unique_users', 1)
+            ->assertJsonPath('top_surfaces.1.unique_users', 1);
 
         $this->withHeader('X-API-Key', 'secret-token')
             ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03&service=news&surface=article_page')
