@@ -55,14 +55,14 @@ class ReportService
             'summary' => [
                 'screen_views' => (int) $surfaceQuery->sum('screen_views'),
                 'sessions' => (int) $surfaceQuery->sum('sessions'),
-                'unique_users' => (int) $surfaceQuery->sum('unique_users'),
+                'unique_users' => $this->uniqueUsersInRange($from, $to, $filters),
                 'sponsor_impressions' => (int) $campaignQuery->sum('qualified_impressions'),
                 'sponsor_clicks' => (int) $campaignQuery->sum('clicks'),
             ],
             'active_users' => [
-                'dau' => $this->uniqueUsersInRange($to, $to, data_get($filters, 'service')),
-                'wau' => $this->uniqueUsersInRange($to->subDays(6), $to, data_get($filters, 'service')),
-                'mau' => $this->uniqueUsersInRange($to->subDays(29), $to, data_get($filters, 'service')),
+                'dau' => $this->uniqueUsersInRange($to, $to, $filters),
+                'wau' => $this->uniqueUsersInRange($to->subDays(6), $to, $filters),
+                'mau' => $this->uniqueUsersInRange($to->subDays(29), $to, $filters),
             ],
             'top_surfaces' => (clone $surfaceQuery)
                 ->select('service', 'surface')
@@ -254,11 +254,14 @@ class ReportService
         return [$from, $to];
     }
 
-    private function uniqueUsersInRange(CarbonImmutable $from, CarbonImmutable $to, ?string $service): int
+    private function uniqueUsersInRange(CarbonImmutable $from, CarbonImmutable $to, array $filters): int
     {
         return (int) AnalyticsEvent::query()
-            ->when($service, fn (Builder $query) => $query->where('service', $service))
-            ->whereBetween('event_date', [$from->toDateString(), $to->toDateString()])
+            ->when(data_get($filters, 'service'), fn (Builder $query, string $service) => $query->where('service', $service))
+            ->when(data_get($filters, 'surface'), fn (Builder $query, string $surface) => $query->where('surface', $surface))
+            ->when(data_get($filters, 'campaign_id'), fn (Builder $query, string $campaignId) => $query->where('campaign_id', $campaignId))
+            ->whereDate('event_date', '>=', $from->toDateString())
+            ->whereDate('event_date', '<=', $to->toDateString())
             ->selectRaw("COUNT(DISTINCT COALESCE(NULLIF(user_id, ''), anonymous_id)) as aggregate")
             ->value('aggregate');
     }

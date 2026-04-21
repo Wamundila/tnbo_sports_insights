@@ -11,7 +11,6 @@
             action="{{ route('admin.reports.overview') }}"
             hx-get="{{ route('admin.reports.overview') }}"
             hx-target="#overview-report"
-            hx-select="#overview-report"
             hx-push-url="true"
             class="row g-3 align-items-end"
         >

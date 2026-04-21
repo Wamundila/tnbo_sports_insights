@@ -86,6 +86,24 @@ class ReportingAndRollupTest extends TestCase
                 'properties' => ['read_time_seconds' => 120],
             ],
             [
+                'event_id' => 'evt_news_home_screen',
+                'event_name' => 'screen_view',
+                'service' => 'news',
+                'surface' => 'home_page',
+                'screen_name' => 'HomePageScreen',
+                'block_id' => null,
+                'block_type' => null,
+                'placement_id' => null,
+                'content_id' => null,
+                'content_type' => null,
+                'campaign_id' => null,
+                'creative_id' => null,
+                'occurred_at' => '2026-04-03 10:05:30',
+                'properties' => null,
+                'user_id' => null,
+                'anonymous_id' => 'anon_2',
+            ],
+            [
                 'event_id' => 'evt_served',
                 'event_name' => 'campaign_served',
                 'service' => 'match_center',
@@ -172,8 +190,8 @@ class ReportingAndRollupTest extends TestCase
                 'event_id' => $event['event_id'],
                 'schema_version' => 1,
                 'session_id' => 'sess_001',
-                'user_id' => 'ts_1',
-                'anonymous_id' => 'anon_1',
+                'user_id' => array_key_exists('user_id', $event) ? $event['user_id'] : 'ts_1',
+                'anonymous_id' => array_key_exists('anonymous_id', $event) ? $event['anonymous_id'] : 'anon_1',
                 'platform' => 'android',
                 'app_version' => '1.0.0',
                 'event_name' => $event['event_name'],
@@ -228,9 +246,25 @@ class ReportingAndRollupTest extends TestCase
         $this->withHeader('X-API-Key', 'secret-token')
             ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03')
             ->assertOk()
-            ->assertJsonPath('summary.screen_views', 1)
+            ->assertJsonPath('summary.screen_views', 2)
+            ->assertJsonPath('summary.unique_users', 2)
+            ->assertJsonPath('active_users.dau', 2)
             ->assertJsonPath('summary.sponsor_impressions', 1)
             ->assertJsonPath('summary.sponsor_clicks', 1);
+
+        $this->withHeader('X-API-Key', 'secret-token')
+            ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03&service=news')
+            ->assertOk()
+            ->assertJsonPath('summary.screen_views', 1)
+            ->assertJsonPath('summary.unique_users', 2)
+            ->assertJsonPath('active_users.dau', 2);
+
+        $this->withHeader('X-API-Key', 'secret-token')
+            ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03&service=news&surface=article_page')
+            ->assertOk()
+            ->assertJsonPath('summary.screen_views', 0)
+            ->assertJsonPath('summary.unique_users', 1)
+            ->assertJsonPath('active_users.dau', 1);
 
         $this->withHeader('X-API-Key', 'secret-token')
             ->getJson('/api/v1/reports/campaigns/cmp_2026_001?date_from=2026-04-03&date_to=2026-04-03')
