@@ -93,7 +93,7 @@ class AggregationRollupService
                     ->values();
 
                 $duration = $timestamps->count() > 1
-                    ? $timestamps->last()->diffInSeconds($timestamps->first())
+                    ? $this->secondsBetween($timestamps->first(), $timestamps->last())
                     : 0;
 
                 return [$key => $duration];
@@ -273,7 +273,7 @@ class AggregationRollupService
                     return 0;
                 }
 
-                return $session->ended_at->diffInSeconds($session->started_at);
+                return $this->secondsBetween($session->started_at, $session->ended_at);
             });
 
             AggDailyUserMetric::query()->create([
@@ -333,5 +333,13 @@ class AggregationRollupService
             ?? data_get($event->properties, 'current_position_seconds')
             ?? 0
         );
+    }
+
+    private function secondsBetween(mixed $start, mixed $end): int
+    {
+        $startAt = CarbonImmutable::parse($start);
+        $endAt = CarbonImmutable::parse($end);
+
+        return max(0, (int) $startAt->diffInSeconds($endAt));
     }
 }

@@ -214,6 +214,17 @@ class ReportingAndRollupTest extends TestCase
             'audio_listen_seconds' => 30,
         ]);
 
+        $this->assertDatabaseHas('agg_daily_surface_metrics', [
+            'service' => 'media',
+            'surface' => 'watch_page',
+            'avg_time_spent_seconds' => 60,
+        ]);
+
+        $this->assertDatabaseHas('agg_daily_user_metrics', [
+            'platform' => 'android',
+            'avg_session_duration_seconds' => 1200,
+        ]);
+
         $this->withHeader('X-API-Key', 'secret-token')
             ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03')
             ->assertOk()
