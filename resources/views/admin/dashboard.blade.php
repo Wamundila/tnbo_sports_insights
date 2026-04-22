@@ -46,25 +46,45 @@
     <div class="row g-3 mb-4">
         <div class="col-md-6 col-xl-3">
             <div class="metric-card">
-                <div class="metric-label">Screen Views</div>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Screen Views</div>
+                    <x-admin.info-modal id="dashboard-screen-views-info" title="Screen Views">
+                        <p class="mb-0">Screen views count how many times app screens were opened in the selected date range. This is activity volume, not unique people.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="metric-value">{{ number_format($overview['summary']['screen_views']) }}</div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="metric-card">
-                <div class="metric-label">Unique Users</div>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Unique Users</div>
+                    <x-admin.info-modal id="dashboard-unique-users-info" title="Unique Users">
+                        <p class="mb-0">Unique users count distinct signed-in users or anonymous users in the selected date range. The value updates after raw events arrive and dashboard aggregates refresh hourly.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="metric-value">{{ number_format($overview['summary']['unique_users']) }}</div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="metric-card">
-                <div class="metric-label">Sponsor Impressions</div>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Sponsor Impressions</div>
+                    <x-admin.info-modal id="dashboard-sponsor-impressions-info" title="Sponsor Impressions">
+                        <p class="mb-0">Sponsor impressions count sponsor blocks that the app reported as viewed. Served ads do not become impressions until the app sends a view or impression event.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="metric-value">{{ number_format($overview['summary']['sponsor_impressions']) }}</div>
             </div>
         </div>
         <div class="col-md-6 col-xl-3">
             <div class="metric-card">
-                <div class="metric-label">Sponsor Clicks</div>
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Sponsor Clicks</div>
+                    <x-admin.info-modal id="dashboard-sponsor-clicks-info" title="Sponsor Clicks">
+                        <p class="mb-0">Sponsor clicks count user interactions with sponsor blocks or CTA buttons. These update after click events are received and aggregates refresh.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="metric-value">{{ number_format($overview['summary']['sponsor_clicks']) }}</div>
             </div>
         </div>
@@ -78,6 +98,9 @@
                         <div class="section-label">Trend</div>
                         <h2 class="h4 mb-0">Audience vs Sponsor Attention</h2>
                     </div>
+                    <x-admin.info-modal id="dashboard-trend-info" title="Audience vs Sponsor Attention">
+                        <p class="mb-0">This chart compares screen views with sponsor impressions by day. It helps show whether sponsor attention is moving with audience activity. Current-day values refresh hourly; completed days are finalized by the daily rollup.</p>
+                    </x-admin.info-modal>
                 </div>
                 <div class="dashboard-chart-frame">
                     <canvas id="surfaceTrendChart"></canvas>
@@ -86,7 +109,12 @@
         </div>
         <div class="col-xl-4">
             <div class="panel-card h-100">
-                <div class="section-label mb-2">Inventory</div>
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div class="section-label mb-0">Inventory</div>
+                    <x-admin.info-modal id="dashboard-inventory-info" title="Inventory">
+                        <p class="mb-0">Sponsors are advertiser accounts. Placements are app slots where ads can appear. Campaigns are commercial campaigns. Active campaigns are campaigns currently marked active; date windows and targets still affect whether they can serve.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="metric-card">
@@ -114,7 +142,13 @@
                     </div>
                 </div>
                 <hr class="my-4">
-                <div class="section-label mb-2">Active Users</div>
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div class="section-label mb-0">Active Users</div>
+                    <x-admin.info-modal id="dashboard-active-users-info" title="Active Users">
+                        <p class="mb-2">DAU is distinct users on the selected end date. WAU is distinct users in the last 7 days ending on that date. MAU is distinct users in the last 30 days ending on that date.</p>
+                        <p class="mb-0">These are calculated from raw events, so they can update as soon as events are ingested.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="d-grid gap-2">
                     <div class="d-flex justify-content-between"><span>DAU</span><strong>{{ number_format($overview['active_users']['dau']) }}</strong></div>
                     <div class="d-flex justify-content-between"><span>WAU</span><strong>{{ number_format($overview['active_users']['wau']) }}</strong></div>
@@ -127,7 +161,13 @@
     <div class="row g-4">
         <div class="col-xl-6">
             <div class="panel-card">
-                <div class="section-label mb-2">Top Surfaces</div>
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div class="section-label mb-0">Top Surfaces</div>
+                    <x-admin.info-modal id="dashboard-top-surfaces-info" title="Top Surfaces">
+                        <p class="mb-2">Top surfaces are ranked by screen views. Users count distinct people for each surface in the selected dates.</p>
+                        <p class="mb-0">Current-day values refresh hourly. Completed days are finalized by the daily rollup, normally after 01:00.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <thead>
@@ -155,13 +195,20 @@
                 <div class="alert alert-light border rounded-4 mt-3 mb-0 small text-secondary">
                     <strong>How to read this:</strong> Views count screen activity. Users count distinct people for that
                     surface in the selected dates. DAU, WAU and MAU are separate active-user totals across the whole app
-                    window, so they will not always match a single surface row.
+                    window, so they will not always match a single surface row. Today refreshes hourly; completed days are
+                    finalized by the daily rollup.
                 </div>
             </div>
         </div>
         <div class="col-xl-6">
             <div class="panel-card">
-                <div class="section-label mb-2">Top Campaigns</div>
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                    <div class="section-label mb-0">Top Campaigns</div>
+                    <x-admin.info-modal id="dashboard-top-campaigns-info" title="Top Campaigns">
+                        <p class="mb-2">Impressions are sponsor views reported by the app. Clicks are sponsor or CTA clicks. Reach is distinct users for that campaign in the selected dates.</p>
+                        <p class="mb-0">These numbers refresh hourly for today and are finalized by the daily rollup for completed days.</p>
+                    </x-admin.info-modal>
+                </div>
                 <div class="table-responsive">
                     <table class="table align-middle mb-0">
                         <thead>
@@ -185,6 +232,11 @@
                         @endforelse
                         </tbody>
                     </table>
+                </div>
+                <div class="alert alert-light border rounded-4 mt-3 mb-0 small text-secondary">
+                    <strong>How to read this:</strong> Impressions are sponsor views. Clicks are sponsor or CTA clicks.
+                    Reach is distinct users for the campaign. Today refreshes hourly; completed days are finalized by the
+                    daily rollup.
                 </div>
             </div>
         </div>

@@ -23,13 +23,59 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Audio Starts</div><div class="metric-value">{{ number_format($report['summary']['audio_starts']) }}</div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Listen Seconds</div><div class="metric-value">{{ number_format($report['summary']['listen_seconds_total']) }}</div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Sponsor Impressions</div><div class="metric-value">{{ number_format($report['summary']['sponsor_impressions']) }}</div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Sponsor Clicks</div><div class="metric-value">{{ number_format($report['summary']['sponsor_clicks']) }}</div></div></div>
+        <div class="col-md-6 col-xl-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Audio Starts</div>
+                    <x-admin.info-modal id="live-audio-starts-info" title="Audio Starts">
+                        <p class="mb-0">Audio starts count play-start events for live or media surfaces in the selected range.</p>
+                    </x-admin.info-modal>
+                </div>
+                <div class="metric-value">{{ number_format($report['summary']['audio_starts']) }}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Listen Seconds</div>
+                    <x-admin.info-modal id="live-listen-seconds-info" title="Listen Seconds">
+                        <p class="mb-0">Listen seconds sum heartbeat listening time reported by the app.</p>
+                    </x-admin.info-modal>
+                </div>
+                <div class="metric-value">{{ number_format($report['summary']['listen_seconds_total']) }}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Sponsor Impressions</div>
+                    <x-admin.info-modal id="live-sponsor-impressions-info" title="Sponsor Impressions">
+                        <p class="mb-0">Sponsor impressions count sponsor views on live/reporting surfaces. Values update from hourly rollups.</p>
+                    </x-admin.info-modal>
+                </div>
+                <div class="metric-value">{{ number_format($report['summary']['sponsor_impressions']) }}</div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="metric-card">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="metric-label">Sponsor Clicks</div>
+                    <x-admin.info-modal id="live-sponsor-clicks-info" title="Sponsor Clicks">
+                        <p class="mb-0">Sponsor clicks count sponsor or CTA click events. Live reports are based on hourly aggregates.</p>
+                    </x-admin.info-modal>
+                </div>
+                <div class="metric-value">{{ number_format($report['summary']['sponsor_clicks']) }}</div>
+            </div>
+        </div>
     </div>
 
     <div class="panel-card">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div class="section-label mb-0">Hourly Live Activity</div>
+            <x-admin.info-modal id="live-hourly-activity-info" title="Hourly Live Activity">
+                <p class="mb-0">This table is built from hourly rollups. New values normally appear after the next hourly scheduler run.</p>
+            </x-admin.info-modal>
+        </div>
         <div class="table-responsive">
             <table class="table align-middle mb-0">
                 <thead><tr><th>Hour</th><th>Service</th><th>Match</th><th class="text-end">Listeners</th><th class="text-end">Listen Seconds</th></tr></thead>

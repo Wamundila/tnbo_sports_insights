@@ -171,6 +171,29 @@
             color: var(--admin-muted);
         }
 
+        .info-button {
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 999px;
+            border: 1px solid rgba(97, 113, 127, 0.35);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 253, 248, 0.75);
+            color: var(--admin-muted);
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .info-button:hover,
+        .info-button:focus {
+            border-color: var(--admin-accent);
+            color: var(--admin-accent-dark);
+            background: rgba(194, 91, 45, 0.08);
+        }
+
         @media (max-width: 991.98px) {
             .admin-shell {
                 grid-template-columns: 1fr;

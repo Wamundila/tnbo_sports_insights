@@ -24,6 +24,13 @@
     </div>
 
     <div class="panel-card">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div class="section-label mb-0">Content Performance</div>
+            <x-admin.info-modal id="content-performance-info" title="Content Performance">
+                <p class="mb-2">Opens count content-open events. Users count distinct users for each content item. Completions count completion events such as article or video completes.</p>
+                <p class="mb-0">Content reports use daily rollups. Today’s values refresh hourly; completed days are finalized by the daily rollup.</p>
+            </x-admin.info-modal>
+        </div>
         <div class="table-responsive">
             <table class="table align-middle mb-0">
                 <thead><tr><th>Content</th><th>Service</th><th class="text-end">Opens</th><th class="text-end">Users</th><th class="text-end">Completions</th></tr></thead>

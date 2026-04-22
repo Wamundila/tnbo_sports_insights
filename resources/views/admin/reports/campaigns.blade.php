@@ -26,17 +26,76 @@
         <div class="panel-card text-secondary">Choose a campaign to view its report.</div>
     @else
         <div class="row g-3 mb-4">
-            <div class="col-md-6 col-xl-2"><div class="metric-card"><div class="metric-label">Served</div><div class="metric-value">{{ number_format($report['summary']['served_count']) }}</div></div></div>
-            <div class="col-md-6 col-xl-2"><div class="metric-card"><div class="metric-label">Rendered</div><div class="metric-value">{{ number_format($report['summary']['rendered_count']) }}</div></div></div>
-            <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Qualified Impressions</div><div class="metric-value">{{ number_format($report['summary']['qualified_impressions']) }}</div></div></div>
-            <div class="col-md-6 col-xl-2"><div class="metric-card"><div class="metric-label">Clicks</div><div class="metric-value">{{ number_format($report['summary']['clicks']) }}</div></div></div>
-            <div class="col-md-6 col-xl-3"><div class="metric-card"><div class="metric-label">Unique Reach</div><div class="metric-value">{{ number_format($report['summary']['unique_users_reached']) }}</div></div></div>
+            <div class="col-md-6 col-xl-2">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="metric-label">Served</div>
+                        <x-admin.info-modal id="campaign-served-info" title="Served">
+                            <p class="mb-0">Served means Insights selected the campaign and returned it from placement resolution. It does not prove the user saw it.</p>
+                        </x-admin.info-modal>
+                    </div>
+                    <div class="metric-value">{{ number_format($report['summary']['served_count']) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-2">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="metric-label">Rendered</div>
+                        <x-admin.info-modal id="campaign-rendered-info" title="Rendered">
+                            <p class="mb-0">Rendered means the app reported that the sponsor block was placed on screen. It updates when render events are ingested and rollups refresh.</p>
+                        </x-admin.info-modal>
+                    </div>
+                    <div class="metric-value">{{ number_format($report['summary']['rendered_count']) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="metric-label">Qualified Impressions</div>
+                        <x-admin.info-modal id="campaign-impressions-info" title="Qualified Impressions">
+                            <p class="mb-0">Qualified impressions are sponsor views reported by the app, such as `sponsor_impression` or `sponsor_block_view` events.</p>
+                        </x-admin.info-modal>
+                    </div>
+                    <div class="metric-value">{{ number_format($report['summary']['qualified_impressions']) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-2">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="metric-label">Clicks</div>
+                        <x-admin.info-modal id="campaign-clicks-info" title="Clicks">
+                            <p class="mb-0">Clicks count sponsor click and CTA click events for this campaign.</p>
+                        </x-admin.info-modal>
+                    </div>
+                    <div class="metric-value">{{ number_format($report['summary']['clicks']) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="metric-label">Unique Reach</div>
+                        <x-admin.info-modal id="campaign-reach-info" title="Unique Reach">
+                            <p class="mb-0">Unique reach is the distinct number of signed-in or anonymous users with campaign activity in the selected date range. It is recalculated from raw events to avoid double-counting.</p>
+                        </x-admin.info-modal>
+                    </div>
+                    <div class="metric-value">{{ number_format($report['summary']['unique_users_reached']) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-light border rounded-4 mb-4 small text-secondary">
+            <strong>Update timing:</strong> Today’s campaign values refresh hourly. Completed days are finalized by the daily rollup, normally after 01:00.
         </div>
 
         <div class="row g-4">
             <div class="col-xl-6">
                 <div class="panel-card">
-                    <div class="section-label mb-2">By Placement</div>
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div class="section-label mb-0">By Placement</div>
+                        <x-admin.info-modal id="campaign-by-placement-info" title="By Placement">
+                            <p class="mb-0">This breaks the campaign down by ad slot. Use it to see which placement is producing impressions, clicks, and CTR.</p>
+                        </x-admin.info-modal>
+                    </div>
                     <div class="table-responsive">
                         <table class="table align-middle mb-0">
                             <thead><tr><th>Placement</th><th class="text-end">Impressions</th><th class="text-end">Clicks</th><th class="text-end">CTR</th></tr></thead>
@@ -56,7 +115,12 @@
             </div>
             <div class="col-xl-6">
                 <div class="panel-card">
-                    <div class="section-label mb-2">By Date</div>
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                        <div class="section-label mb-0">By Date</div>
+                        <x-admin.info-modal id="campaign-by-date-info" title="By Date">
+                            <p class="mb-0">This shows daily campaign delivery. Current-day rows can change during the day; older rows settle after the daily rollup.</p>
+                        </x-admin.info-modal>
+                    </div>
                     <div class="table-responsive">
                         <table class="table align-middle mb-0">
                             <thead><tr><th>Date</th><th class="text-end">Served</th><th class="text-end">Impressions</th><th class="text-end">Clicks</th></tr></thead>
