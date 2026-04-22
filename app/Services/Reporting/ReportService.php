@@ -99,7 +99,14 @@ class ReportService
                 ->groupBy('campaign_id')
                 ->orderByDesc('qualified_impressions')
                 ->limit(10)
-                ->get(),
+                ->get()
+                ->map(function ($campaign) use ($filters, $from, $to) {
+                    $campaign->unique_reach = $this->uniqueUsersInRange($from, $to, array_merge($filters, [
+                        'campaign_id' => $campaign->campaign_id,
+                    ]));
+
+                    return $campaign;
+                }),
         ];
     }
 
@@ -140,7 +147,9 @@ class ReportService
                     (int) $query->sum('clicks'),
                     (int) $query->sum('qualified_impressions')
                 ),
-                'unique_users_reached' => (int) $query->sum('unique_reach'),
+                'unique_users_reached' => $this->uniqueUsersInRange($from, $to, [
+                    'campaign_id' => $campaignCode,
+                ]),
             ],
             'by_placement' => (clone $query)
                 ->select('placement_id')

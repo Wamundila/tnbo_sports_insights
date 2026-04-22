@@ -152,6 +152,22 @@ class ReportingAndRollupTest extends TestCase
                 'properties' => null,
             ],
             [
+                'event_id' => 'evt_served_second_slot',
+                'event_name' => 'campaign_served',
+                'service' => 'match_center',
+                'surface' => 'match_center_page',
+                'screen_name' => 'MatchDetailScreen',
+                'block_id' => 'match_center_inline_2',
+                'block_type' => 'sponsor_card',
+                'placement_id' => 'match_center_inline_2',
+                'content_id' => null,
+                'content_type' => null,
+                'campaign_id' => 'cmp_2026_001',
+                'creative_id' => 'creative_02',
+                'occurred_at' => '2026-04-03 10:09:00',
+                'properties' => null,
+            ],
+            [
                 'event_id' => 'evt_audio_play',
                 'event_name' => 'audio_play',
                 'service' => 'media',
@@ -250,7 +266,8 @@ class ReportingAndRollupTest extends TestCase
             ->assertJsonPath('summary.unique_users', 2)
             ->assertJsonPath('active_users.dau', 2)
             ->assertJsonPath('summary.sponsor_impressions', 1)
-            ->assertJsonPath('summary.sponsor_clicks', 1);
+            ->assertJsonPath('summary.sponsor_clicks', 1)
+            ->assertJsonPath('top_campaigns.0.unique_reach', 1);
 
         $this->withHeader('X-API-Key', 'secret-token')
             ->getJson('/api/v1/reports/overview?date_from=2026-04-03&date_to=2026-04-03&service=news')
@@ -273,6 +290,7 @@ class ReportingAndRollupTest extends TestCase
             ->assertOk()
             ->assertJsonPath('summary.qualified_impressions', 1)
             ->assertJsonPath('summary.clicks', 1)
+            ->assertJsonPath('summary.unique_users_reached', 1)
             ->assertJsonPath('by_placement.0.placement_id', 'match_center_header_companion');
 
         $this->withHeader('X-API-Key', 'secret-token')
