@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\AnalyticsEvent;
 use App\Services\Analytics\RawEventRetentionService;
 use App\Services\Reporting\AggregationRollupService;
+use App\Support\ReportingTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -66,6 +68,40 @@ Artisan::command('insights:prune-raw-events {--before-date=} {--retention-days=}
 
     return ConsoleCommand::SUCCESS;
 })->purpose('Prune old TNBO Insights raw analytics events and dedup records');
+
+Artisan::command('insights:repair-event-dates {--from-date=} {--to-date=}', function () {
+    $query = AnalyticsEvent::query();
+
+    if ($fromDate = $this->option('from-date')) {
+        $query->whereDate('occurred_at', '>=', $fromDate);
+    }
+
+    if ($toDate = $this->option('to-date')) {
+        $query->whereDate('occurred_at', '<=', $toDate);
+    }
+
+    $scanned = 0;
+    $updated = 0;
+
+    $query->orderBy('id')->chunkById(1000, function ($events) use (&$scanned, &$updated): void {
+        foreach ($events as $event) {
+            $scanned++;
+
+            $eventDate = ReportingTime::eventDateFromStoredUtc($event->getRawOriginal('occurred_at'));
+
+            if ($event->event_date?->toDateString() === $eventDate) {
+                continue;
+            }
+
+            $event->forceFill(['event_date' => $eventDate])->saveQuietly();
+            $updated++;
+        }
+    });
+
+    $this->info("Scanned {$scanned} analytics events. Repaired {$updated} event_date values.");
+
+    return ConsoleCommand::SUCCESS;
+})->purpose('Repair analytics event_date values from occurred_at using the reporting timezone');
 
 Schedule::command('insights:rollup-hourly')->hourly();
 Schedule::command('insights:rollup-today')->hourly();

@@ -9,6 +9,7 @@ use App\Models\CampaignDeliveryLog;
 use App\Models\CampaignTarget;
 use App\Models\Placement;
 use App\Models\SponsorBlockEvent;
+use App\Support\ReportingTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -87,7 +88,7 @@ class PlacementResolutionService
 
         return DB::transaction(function () use ($placement, $target, $creative, $payload): array {
             $deliveryId = (string) Str::uuid();
-            $servedAt = CarbonImmutable::now();
+            $servedAt = CarbonImmutable::now('UTC');
 
             $deliveryLog = CampaignDeliveryLog::query()->create([
                 'delivery_id' => $deliveryId,
@@ -147,7 +148,7 @@ class PlacementResolutionService
                 'competition_id' => data_get($payload, 'context.competition_id'),
                 'team_id' => data_get($payload, 'context.team_id'),
                 'occurred_at' => $servedAt,
-                'event_date' => $servedAt->toDateString(),
+                'event_date' => ReportingTime::eventDate($servedAt),
                 'properties' => [
                     'delivery_id' => $deliveryId,
                     'served_by' => 'insights',

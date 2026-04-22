@@ -45,6 +45,7 @@ Implemented schema and models for:
 - Added strict payload validation.
 - Added event deduplication.
 - Added session materialization support.
+- Kept client event timestamps as UTC instants while deriving report dates from the configured reporting timezone.
 
 ### 4. Sponsor Placement Resolution
 
@@ -52,6 +53,7 @@ Implemented schema and models for:
 - Added target matching by placement, service, surface, campaign status, and campaign date window.
 - Added delivery logging for served sponsor responses.
 - Added generated `campaign_served` analytics events.
+- Generated sponsor-serving analytics events now use the same reporting-date timezone logic as client-ingested events.
 
 ### 5. Reporting and Aggregates
 
@@ -70,6 +72,8 @@ Implemented schema and models for:
   - campaigns
   - content
   - live metrics
+- Added `insights:rollup-today` for hourly current-day dashboard visibility.
+- Added `insights:repair-event-dates` to repair existing rows after timezone/date derivation fixes.
 
 ### 6. Admin Web Console
 
@@ -114,8 +118,8 @@ Implemented schema and models for:
   - reporting and rollups
   - raw event retention
 - Current local test status at the time of writing:
-  - `20` tests passing
-  - `108` assertions passing
+  - `26` tests passing
+  - `152` assertions passing
 
 ## Operational Notes
 
@@ -124,6 +128,7 @@ Implemented schema and models for:
 - Uploaded creative assets require `php artisan storage:link` in each environment.
 - If external clients or devices need to load creative assets, `APP_URL` must be reachable from those clients.
 - Placement resolution is currently confirmed working for `home_inline_1` with an active campaign.
+- Mobile/BFF should keep sending UTC timestamps; Insights derives `event_date` using `INSIGHTS_REPORTING_TIMEZONE`.
 
 ## Work Still To Be Done
 

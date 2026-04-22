@@ -10,6 +10,7 @@ use App\Models\CampaignCreative;
 use App\Models\CampaignDeliveryLog;
 use App\Models\Placement;
 use App\Models\SponsorBlockEvent;
+use App\Support\ReportingTime;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -36,18 +37,17 @@ class EventIngestionService
     public function ingestEvent(array $event, int $schemaVersion = 1): bool
     {
         $event = $this->normalizeEvent($event);
+        $occurredAt = ReportingTime::utcInstant($event['occurred_at']);
 
-        return DB::transaction(function () use ($event, $schemaVersion): bool {
+        return DB::transaction(function () use ($event, $schemaVersion, $occurredAt): bool {
             $dedup = AnalyticsEventDedup::query()->firstOrCreate(
                 ['event_id' => $event['event_id']],
-                ['first_seen_at' => $event['occurred_at']]
+                ['first_seen_at' => $occurredAt]
             );
 
             if (! $dedup->wasRecentlyCreated) {
                 return false;
             }
-
-            $occurredAt = CarbonImmutable::parse($event['occurred_at']);
 
             $this->materializeSession($event, $occurredAt);
 
@@ -77,7 +77,7 @@ class EventIngestionService
                 'competition_id' => $event['competition_id'] ?? null,
                 'team_id' => $event['team_id'] ?? null,
                 'occurred_at' => $occurredAt,
-                'event_date' => $occurredAt->toDateString(),
+                'event_date' => ReportingTime::eventDate($occurredAt),
                 'properties' => $event['properties'] ?? null,
             ]);
 

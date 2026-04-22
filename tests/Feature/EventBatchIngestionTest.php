@@ -263,6 +263,39 @@ class EventBatchIngestionTest extends TestCase
         $this->assertSame('vertical_card_stack', $event->properties['content_presentation_type']);
     }
 
+    public function test_it_derives_event_date_using_reporting_timezone_from_utc_occurred_at(): void
+    {
+        config()->set('insights.api_key', 'secret-token');
+        config()->set('insights.reporting_timezone', 'Africa/Lusaka');
+
+        $payload = [
+            'schema_version' => 1,
+            'events' => [
+                [
+                    'event_id' => 'evt_timezone_boundary_001',
+                    'event_name' => 'screen_view',
+                    'occurred_at' => '2026-04-03T22:30:00Z',
+                    'service' => 'news',
+                    'surface' => 'home_page',
+                    'screen_name' => 'NewsHomeScreen',
+                    'anonymous_id' => 'anon_1',
+                    'session_id' => 'sess_001',
+                    'platform' => 'android',
+                    'app_version' => '1.0.0',
+                ],
+            ],
+        ];
+
+        $this->withHeader('X-API-Key', 'secret-token')
+            ->postJson('/api/v1/events/batch', $payload)
+            ->assertOk()
+            ->assertJson(['stored_count' => 1]);
+
+        $event = AnalyticsEvent::query()->where('event_id', 'evt_timezone_boundary_001')->firstOrFail();
+
+        $this->assertSame('2026-04-04', $event->event_date->toDateString());
+    }
+
     public function test_it_promotes_sponsor_context_from_properties_into_reportable_columns(): void
     {
         config()->set('insights.api_key', 'secret-token');

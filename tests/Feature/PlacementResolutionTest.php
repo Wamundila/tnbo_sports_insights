@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AnalyticsEvent;
 use App\Models\Campaign;
 use App\Models\CampaignCreative;
 use App\Models\CampaignDeliveryLog;
@@ -123,6 +124,78 @@ class PlacementResolutionTest extends TestCase
             'creative_code' => 'creative_01',
             'placement_code' => 'match_center_header_companion',
         ]);
+    }
+
+    public function test_it_derives_served_event_date_using_reporting_timezone(): void
+    {
+        config()->set('insights.api_key', 'secret-token');
+        config()->set('insights.reporting_timezone', 'Africa/Lusaka');
+
+        Carbon::setTestNow(Carbon::parse('2026-04-03T22:30:00Z'));
+
+        $placement = Placement::query()->create([
+            'code' => 'match_center_header_companion',
+            'name' => 'Match Center Header Companion',
+            'service' => 'match_center',
+            'surface' => 'match_center_page',
+            'block_type' => 'sponsor_card',
+            'allowed_creative_types' => ['sponsor_card'],
+            'is_active' => true,
+        ]);
+
+        $sponsor = Sponsor::query()->create([
+            'code' => 'zamtel',
+            'name' => 'Zamtel',
+            'status' => 'active',
+        ]);
+
+        $campaign = Campaign::query()->create([
+            'sponsor_id' => $sponsor->id,
+            'code' => 'cmp_timezone_001',
+            'name' => 'Timezone Campaign',
+            'status' => 'active',
+            'start_at' => Carbon::now()->subDay(),
+            'end_at' => Carbon::now()->addDay(),
+        ]);
+
+        CampaignCreative::query()->create([
+            'campaign_id' => $campaign->id,
+            'code' => 'creative_timezone_01',
+            'creative_type' => 'sponsor_card',
+            'title' => 'Timezone Creative',
+            'status' => 'active',
+        ]);
+
+        CampaignTarget::query()->create([
+            'campaign_id' => $campaign->id,
+            'placement_id' => $placement->id,
+            'service' => 'match_center',
+            'surface' => 'match_center_page',
+            'priority' => 100,
+            'weight' => 1,
+            'is_active' => true,
+        ]);
+
+        $this->withHeader('X-API-Key', 'secret-token')
+            ->postJson('/api/v1/placements/resolve', [
+                'anonymous_id' => 'anon_ab12',
+                'session_id' => 'sess_001',
+                'platform' => 'android',
+                'service' => 'match_center',
+                'surface' => 'match_center_page',
+                'screen_name' => 'MatchDetailScreen',
+                'placements' => [
+                    'match_center_header_companion',
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('placements.0.placement_id', 'match_center_header_companion');
+
+        $event = AnalyticsEvent::query()->where('event_name', 'campaign_served')->firstOrFail();
+
+        $this->assertSame('2026-04-04', $event->event_date->toDateString());
+
+        Carbon::setTestNow();
     }
 
     public function test_it_returns_only_successfully_resolved_placements_when_some_slots_have_no_campaign(): void

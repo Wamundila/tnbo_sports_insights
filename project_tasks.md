@@ -55,6 +55,8 @@ Status: `completed`
 - daily rollups
 - hourly rollups
 - hourly current-day daily aggregate refresh for dashboard visibility
+- UTC event ingestion with Zambia reporting-date derivation
+- repair command for existing event dates after timezone configuration changes
 - scheduled rollup commands
 - admin report screens
 

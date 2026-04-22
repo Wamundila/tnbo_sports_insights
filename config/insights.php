@@ -4,6 +4,7 @@ return [
     'api_key' => env('INSIGHTS_API_KEY'),
     'api_key_header' => env('INSIGHTS_API_KEY_HEADER', 'X-API-Key'),
     'raw_event_retention_days' => (int) env('INSIGHTS_RAW_EVENT_RETENTION_DAYS', 90),
+    'reporting_timezone' => env('INSIGHTS_REPORTING_TIMEZONE', config('app.timezone', 'UTC')),
 
     'allowed_services' => [
         'news',

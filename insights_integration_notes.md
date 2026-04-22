@@ -25,6 +25,7 @@ Environment variables used by the service:
 ```env
 INSIGHTS_API_KEY=replace-with-a-strong-random-value
 INSIGHTS_API_KEY_HEADER=X-API-Key
+INSIGHTS_REPORTING_TIMEZONE=Africa/Lusaka
 ```
 
 Important:
@@ -32,6 +33,22 @@ Important:
 - Do not expose this key to Flutter/mobile clients.
 - Flutter should continue sending analytics through BFF.
 - BFF should call TNBO Insights using the internal `X-API-Key` header.
+
+## Time Handling
+
+Clients and BFF should send `occurred_at` in UTC, preferably as an ISO-8601 timestamp ending in `Z`.
+
+TNBO Insights stores the raw event instant in UTC, then derives the report `event_date` using `INSIGHTS_REPORTING_TIMEZONE` (`Africa/Lusaka` by default). This means an event at `2026-04-03T22:30:00Z` is stored as a UTC event but appears in reports for `2026-04-04` in Zambia.
+
+For existing production rows created before this rule, run:
+
+```bash
+php artisan insights:repair-event-dates --from-date=2026-04-01 --to-date=2026-04-22
+php artisan insights:rollup-daily --date=2026-04-03
+php artisan insights:rollup-today
+```
+
+Use a broad enough `--from-date`/`--to-date` range because the repair command filters by stored UTC `occurred_at` date. Repeat `insights:rollup-daily --date=...` for every affected reporting date, including the day before and day after the repaired window when events may have shifted across midnight.
 
 ## Admin Auth Boundary
 
@@ -154,6 +171,7 @@ Behavior:
 
 - `source` is optional
 - `event_id` is the idempotency key
+- send `occurred_at` in UTC; report dates are derived in the Insights reporting timezone
 - duplicate replays are accepted but not re-stored
 - unknown top-level event fields are rejected with `422`
 - `anonymous_id` is required even when `user_id` is present
