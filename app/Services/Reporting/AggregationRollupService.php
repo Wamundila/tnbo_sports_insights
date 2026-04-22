@@ -62,7 +62,7 @@ class AggregationRollupService
                     'unique_users' => $identities->count(),
                     'screen_views' => $group->where('event_name', 'screen_view')->count(),
                     'content_opens' => $group->filter(fn (AnalyticsEvent $event) => $this->isContentOpenEvent($event->event_name))->count(),
-                    'sponsor_impressions' => $group->where('event_name', 'sponsor_block_view')->count(),
+                    'sponsor_impressions' => $group->filter(fn (AnalyticsEvent $event) => $this->isSponsorImpressionEvent($event->event_name))->count(),
                     'sponsor_clicks' => $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['sponsor_click', 'sponsor_cta_click'], true))->count(),
                     'audio_starts' => $group->where('event_name', 'audio_play')->count(),
                     'audio_listen_seconds' => $group->sum(fn (AnalyticsEvent $event) => $event->event_name === 'audio_heartbeat'
@@ -116,7 +116,7 @@ class AggregationRollupService
                     'unique_users' => $this->distinctIdentities($group)->count(),
                     'screen_views' => $group->where('event_name', 'screen_view')->count(),
                     'exits' => $group->where('event_name', 'screen_exit')->count(),
-                    'sponsor_impressions' => $group->where('event_name', 'sponsor_block_view')->count(),
+                    'sponsor_impressions' => $group->filter(fn (AnalyticsEvent $event) => $this->isSponsorImpressionEvent($event->event_name))->count(),
                     'sponsor_clicks' => $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['sponsor_click', 'sponsor_cta_click'], true))->count(),
                     'avg_time_spent_seconds' => $sessionDurations->isEmpty()
                         ? 0
@@ -142,10 +142,10 @@ class AggregationRollupService
             ]))
             ->each(function (Collection $group, string $key) use ($date): void {
                 [$service, $surface, $blockId, $blockType, $placementId] = explode('|', $key);
-                $blockViews = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['block_view', 'sponsor_block_view'], true))->count();
+                $blockViews = $group->filter(fn (AnalyticsEvent $event) => $event->event_name === 'block_view' || $this->isSponsorImpressionEvent($event->event_name))->count();
                 $blockClicks = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['item_click', 'sponsor_click', 'sponsor_cta_click'], true))->count();
                 $sponsorClicks = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['sponsor_click', 'sponsor_cta_click'], true))->count();
-                $sponsorImpressions = $group->where('event_name', 'sponsor_block_view')->count();
+                $sponsorImpressions = $group->filter(fn (AnalyticsEvent $event) => $this->isSponsorImpressionEvent($event->event_name))->count();
 
                 AggDailyBlockMetric::query()->create([
                     'metric_date' => $date->toDateString(),
@@ -157,7 +157,7 @@ class AggregationRollupService
                     'block_views' => $blockViews,
                     'block_clicks' => $blockClicks,
                     'unique_viewers' => $this->distinctIdentities(
-                        $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['block_view', 'sponsor_block_view'], true))
+                        $group->filter(fn (AnalyticsEvent $event) => $event->event_name === 'block_view' || $this->isSponsorImpressionEvent($event->event_name))
                     )->count(),
                     'sponsor_impressions' => $sponsorImpressions,
                     'sponsor_clicks' => $sponsorClicks,
@@ -222,8 +222,8 @@ class AggregationRollupService
             ->each(function (Collection $group, string $key) use ($date, $campaignSponsorCodes): void {
                 [$campaignId, $creativeId, $placementId, $service, $surface] = explode('|', $key);
                 $served = $group->where('event_name', 'campaign_served')->count();
-                $rendered = $group->where('event_name', 'sponsor_block_rendered')->count();
-                $qualified = $group->where('event_name', 'sponsor_block_view')->count();
+                $rendered = $group->filter(fn (AnalyticsEvent $event) => $this->isSponsorRenderedEvent($event->event_name))->count();
+                $qualified = $group->filter(fn (AnalyticsEvent $event) => $this->isSponsorImpressionEvent($event->event_name))->count();
                 $clicks = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['sponsor_click', 'sponsor_cta_click'], true))->count();
 
                 AggDailyCampaignMetric::query()->create([
@@ -323,6 +323,16 @@ class AggregationRollupService
             'game_complete',
             'sponsor_video_complete',
         ], true);
+    }
+
+    private function isSponsorImpressionEvent(string $eventName): bool
+    {
+        return in_array($eventName, ['sponsor_block_view', 'sponsor_impression'], true);
+    }
+
+    private function isSponsorRenderedEvent(string $eventName): bool
+    {
+        return in_array($eventName, ['sponsor_block_rendered', 'sponsor_rendered'], true);
     }
 
     private function engagementSeconds(AnalyticsEvent $event): int

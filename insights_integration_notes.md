@@ -278,6 +278,33 @@ BFF should:
 2. preserve the returned `campaign_id`, `creative_id`, `placement_id`, and `delivery_id`
 3. ensure Flutter includes those values in later sponsor render/view/click events
 
+Sponsor follow-up events should include sponsor context as top-level fields where possible:
+
+```json
+{
+  "event_name": "sponsor_impression",
+  "campaign_id": "cmp_2026_001",
+  "creative_id": "creative_01",
+  "placement_id": "home_inline_1",
+  "block_id": "home_inline_1",
+  "block_type": "sponsor_card",
+  "properties": {
+    "delivery_id": "delivery_123",
+    "visible_duration_ms": 1400,
+    "visibility_percent": 80
+  }
+}
+```
+
+If older clients send `campaign_id`, `creative_id`, `placement_id`, `block_id`, or `block_type` inside `properties`, Insights promotes those values into the indexed event columns during ingestion.
+
+Recognized sponsor reporting events:
+
+- `campaign_served`: Insights selected and returned the campaign
+- `sponsor_block_rendered` or `sponsor_rendered`: the client rendered the sponsor block
+- `sponsor_block_view` or `sponsor_impression`: the block became a qualified impression
+- `sponsor_click` or `sponsor_cta_click`: the user clicked or activated the sponsor CTA
+
 Recommended fallback:
 
 - if Insights returns an empty `placements` array, BFF should return the page without sponsor blocks

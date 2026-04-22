@@ -189,7 +189,11 @@ class EventIngestionService
             $properties = array_replace($properties, $event['properties']);
         }
 
-        foreach (['content_id', 'match_id', 'competition_id', 'team_id'] as $identifierField) {
+        foreach (['campaign_id', 'creative_id', 'placement_id', 'block_id', 'block_type'] as $contextField) {
+            $event[$contextField] = $this->promoteEventContext($event, $properties, $contextField);
+        }
+
+        foreach (['content_id', 'match_id', 'competition_id', 'team_id', 'campaign_id', 'creative_id', 'placement_id', 'block_id', 'block_type'] as $identifierField) {
             if (array_key_exists($identifierField, $event) && $event[$identifierField] !== null) {
                 $event[$identifierField] = (string) $event[$identifierField];
             }
@@ -200,5 +204,16 @@ class EventIngestionService
         unset($event['metadata']);
 
         return $event;
+    }
+
+    private function promoteEventContext(array $event, array $properties, string $field): mixed
+    {
+        if (array_key_exists($field, $event) && filled($event[$field])) {
+            return $event[$field];
+        }
+
+        $camelField = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $field))));
+
+        return $properties[$field] ?? $properties[$camelField] ?? null;
     }
 }

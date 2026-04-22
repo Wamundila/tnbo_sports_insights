@@ -121,7 +121,7 @@ class ReportingAndRollupTest extends TestCase
             ],
             [
                 'event_id' => 'evt_view',
-                'event_name' => 'sponsor_block_view',
+                'event_name' => 'sponsor_impression',
                 'service' => 'match_center',
                 'surface' => 'match_center_page',
                 'screen_name' => 'MatchDetailScreen',

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsEventDedup;
 use App\Models\AnalyticsSession;
+use App\Models\SponsorBlockEvent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -260,5 +261,55 @@ class EventBatchIngestionTest extends TestCase
         $this->assertSame('3', $event->competition_id);
         $this->assertSame('tnbo-league', $event->properties['competition_slug']);
         $this->assertSame('vertical_card_stack', $event->properties['content_presentation_type']);
+    }
+
+    public function test_it_promotes_sponsor_context_from_properties_into_reportable_columns(): void
+    {
+        config()->set('insights.api_key', 'secret-token');
+
+        $payload = [
+            'schema_version' => 1,
+            'events' => [
+                [
+                    'event_id' => 'evt_sponsor_impression_001',
+                    'event_name' => 'sponsor_impression',
+                    'occurred_at' => '2026-04-03T10:20:00Z',
+                    'service' => 'match_center',
+                    'surface' => 'match_center_page',
+                    'screen_name' => 'MatchDetailScreen',
+                    'anonymous_id' => 'anon_1',
+                    'session_id' => 'sess_001',
+                    'platform' => 'android',
+                    'app_version' => '1.0.0',
+                    'properties' => [
+                        'campaign_id' => 'cmp_2026_001',
+                        'creative_id' => 'creative_01',
+                        'placement_id' => 'match_center_header_companion',
+                        'block_id' => 'match_center_header_companion',
+                        'block_type' => 'sponsor_card',
+                        'delivery_id' => 'delivery_001',
+                    ],
+                ],
+            ],
+        ];
+
+        $this->withHeader('X-API-Key', 'secret-token')
+            ->postJson('/api/v1/events/batch', $payload)
+            ->assertOk()
+            ->assertJson(['stored_count' => 1]);
+
+        $event = AnalyticsEvent::query()->where('event_id', 'evt_sponsor_impression_001')->firstOrFail();
+
+        $this->assertSame('cmp_2026_001', $event->campaign_id);
+        $this->assertSame('creative_01', $event->creative_id);
+        $this->assertSame('match_center_header_companion', $event->placement_id);
+        $this->assertSame('match_center_header_companion', $event->block_id);
+        $this->assertSame('sponsor_card', $event->block_type);
+
+        $sponsorEvent = SponsorBlockEvent::query()->where('event_id', 'evt_sponsor_impression_001')->firstOrFail();
+
+        $this->assertSame('cmp_2026_001', $sponsorEvent->campaign_code);
+        $this->assertSame('creative_01', $sponsorEvent->creative_code);
+        $this->assertSame('match_center_header_companion', $sponsorEvent->placement_code);
     }
 }
