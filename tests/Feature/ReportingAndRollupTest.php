@@ -296,4 +296,51 @@ class ReportingAndRollupTest extends TestCase
             ->assertNotFound()
             ->assertJsonPath('code', 'REPORT_NOT_FOUND');
     }
+
+    public function test_it_refreshes_current_day_campaign_metrics_for_dashboard_visibility(): void
+    {
+        CarbonImmutable::setTestNow('2026-04-22 14:20:00');
+
+        Campaign::query()->create([
+            'sponsor_id' => Sponsor::query()->create([
+                'code' => 'absa',
+                'name' => 'ABSA',
+                'status' => 'active',
+            ])->id,
+            'code' => 'cmp_today_001',
+            'name' => 'Today Campaign',
+            'status' => 'active',
+        ]);
+
+        AnalyticsEvent::query()->create([
+            'event_id' => 'evt_today_served',
+            'schema_version' => 1,
+            'session_id' => 'sess_today',
+            'anonymous_id' => 'anon_today',
+            'platform' => 'android',
+            'app_version' => '1.0.0',
+            'event_name' => 'campaign_served',
+            'event_category' => 'sponsors',
+            'service' => 'match_center',
+            'surface' => 'match_center_page',
+            'screen_name' => 'MatchDetailScreen',
+            'placement_id' => 'match_center_header_companion',
+            'campaign_id' => 'cmp_today_001',
+            'creative_id' => 'creative_today_001',
+            'occurred_at' => '2026-04-22 14:15:00',
+            'event_date' => '2026-04-22',
+        ]);
+
+        $this->artisan('insights:rollup-today')
+            ->expectsOutput('Refreshed current-day metrics for 2026-04-22')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('agg_daily_campaign_metrics', [
+            'metric_date' => '2026-04-22 00:00:00',
+            'campaign_id' => 'cmp_today_001',
+            'served_count' => 1,
+        ]);
+
+        CarbonImmutable::setTestNow();
+    }
 }

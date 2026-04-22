@@ -22,6 +22,14 @@ Artisan::command('insights:rollup-daily {--date=}', function (AggregationRollupS
     $this->info('Rolled up daily metrics for '.$date->toDateString());
 })->purpose('Roll up TNBO Insights daily aggregate metrics');
 
+Artisan::command('insights:rollup-today', function (AggregationRollupService $service) {
+    $date = CarbonImmutable::today();
+
+    $service->rollupDate($date);
+
+    $this->info('Refreshed current-day metrics for '.$date->toDateString());
+})->purpose('Refresh current-day TNBO Insights aggregate metrics for dashboard visibility');
+
 Artisan::command('insights:rollup-hourly {--hour=}', function (AggregationRollupService $service) {
     $hour = $this->option('hour')
         ? CarbonImmutable::parse($this->option('hour'))
@@ -60,5 +68,6 @@ Artisan::command('insights:prune-raw-events {--before-date=} {--retention-days=}
 })->purpose('Prune old TNBO Insights raw analytics events and dedup records');
 
 Schedule::command('insights:rollup-hourly')->hourly();
+Schedule::command('insights:rollup-today')->hourly();
 Schedule::command('insights:rollup-daily')->dailyAt('01:00');
 Schedule::command('insights:prune-raw-events')->dailyAt('02:00');

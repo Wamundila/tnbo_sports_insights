@@ -54,6 +54,7 @@ Status: `completed`
 
 - daily rollups
 - hourly rollups
+- hourly current-day daily aggregate refresh for dashboard visibility
 - scheduled rollup commands
 - admin report screens
 
