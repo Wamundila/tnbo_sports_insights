@@ -137,11 +137,11 @@ class AggregationRollupService
                 $event->service,
                 $event->surface,
                 $event->block_id,
-                $event->block_type,
                 $event->placement_id,
             ]))
             ->each(function (Collection $group, string $key) use ($date): void {
-                [$service, $surface, $blockId, $blockType, $placementId] = explode('|', $key);
+                [$service, $surface, $blockId, $placementId] = explode('|', $key);
+                $blockType = $this->modeValue($group->pluck('block_type'));
                 $blockViews = $group->filter(fn (AnalyticsEvent $event) => $event->event_name === 'block_view' || $this->isSponsorImpressionEvent($event->event_name))->count();
                 $blockClicks = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['item_click', 'sponsor_click', 'sponsor_cta_click'], true))->count();
                 $sponsorClicks = $group->filter(fn (AnalyticsEvent $event) => in_array($event->event_name, ['sponsor_click', 'sponsor_cta_click'], true))->count();
@@ -152,7 +152,7 @@ class AggregationRollupService
                     'service' => $service,
                     'surface' => $surface,
                     'block_id' => $blockId,
-                    'block_type' => $blockType !== '' ? $blockType : null,
+                    'block_type' => $blockType,
                     'placement_id' => $placementId !== '' ? $placementId : null,
                     'block_views' => $blockViews,
                     'block_clicks' => $blockClicks,
@@ -297,6 +297,15 @@ class AggregationRollupService
             ->filter()
             ->unique()
             ->values();
+    }
+
+    private function modeValue(Collection $values): ?string
+    {
+        $mode = $values
+            ->filter()
+            ->mode();
+
+        return is_array($mode) ? ($mode[0] ?? null) : null;
     }
 
     private function isContentOpenEvent(string $eventName): bool

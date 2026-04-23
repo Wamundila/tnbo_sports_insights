@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AggDailyBlockMetric;
 use App\Models\AnalyticsEvent;
 use App\Models\AnalyticsSession;
 use App\Models\Campaign;
@@ -358,6 +359,50 @@ class ReportingAndRollupTest extends TestCase
             'campaign_id' => 'cmp_today_001',
             'served_count' => 1,
         ]);
+
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_it_rolls_up_block_metrics_when_block_type_values_differ_for_the_same_slot(): void
+    {
+        CarbonImmutable::setTestNow('2026-04-23 10:00:00');
+
+        foreach (['sponsor_block', 'sponsor_card'] as $index => $blockType) {
+            AnalyticsEvent::query()->create([
+                'event_id' => 'evt_block_type_collision_'.$index,
+                'schema_version' => 1,
+                'session_id' => 'sess_'.$index,
+                'anonymous_id' => 'anon_'.$index,
+                'platform' => 'android',
+                'app_version' => '1.0.0',
+                'event_name' => 'sponsor_impression',
+                'event_category' => 'sponsors',
+                'service' => 'match_center',
+                'surface' => 'match_center_page',
+                'screen_name' => 'MatchDetailScreen',
+                'block_id' => 'match_center_header_companion',
+                'block_type' => $blockType,
+                'placement_id' => 'match_center_header_companion',
+                'campaign_id' => 'cmp_2026_001',
+                'creative_id' => 'creative_01',
+                'occurred_at' => '2026-04-23 09:00:00',
+                'event_date' => '2026-04-23',
+            ]);
+        }
+
+        $this->artisan('insights:rollup-today')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('agg_daily_block_metrics', [
+            'metric_date' => '2026-04-23 00:00:00',
+            'service' => 'match_center',
+            'surface' => 'match_center_page',
+            'block_id' => 'match_center_header_companion',
+            'placement_id' => 'match_center_header_companion',
+            'sponsor_impressions' => 2,
+        ]);
+
+        $this->assertSame(1, AggDailyBlockMetric::query()->count());
 
         CarbonImmutable::setTestNow();
     }
