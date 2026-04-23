@@ -94,6 +94,7 @@ class PlacementResolutionTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('placements.0.placement_id', 'match_center_header_companion')
+            ->assertJsonPath('placements.0.block_type', 'sponsor_card')
             ->assertJsonPath('placements.0.served_event.event_name', 'campaign_served')
             ->assertJsonPath('placements.0.creative.campaign_id', 'cmp_2026_001')
             ->assertJsonPath('placements.0.creative.creative_id', 'creative_01')

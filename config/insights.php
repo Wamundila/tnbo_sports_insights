@@ -6,6 +6,20 @@ return [
     'raw_event_retention_days' => (int) env('INSIGHTS_RAW_EVENT_RETENTION_DAYS', 90),
     'reporting_timezone' => env('INSIGHTS_REPORTING_TIMEZONE', config('app.timezone', 'UTC')),
 
+    'placement_block_types' => [
+        'sponsor_card' => 'Sponsor Card',
+        'image_banner' => 'Image Banner',
+        'sponsored_tile' => 'Sponsored Tile',
+        'audio_companion' => 'Audio Companion',
+    ],
+
+    'creative_types' => [
+        'image_banner' => 'Image Banner',
+        'sponsor_card' => 'Sponsor Card',
+        'sponsored_tile' => 'Sponsored Tile',
+        'audio_companion' => 'Audio Companion',
+    ],
+
     'allowed_services' => [
         'news',
         'match_center',

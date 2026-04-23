@@ -265,6 +265,7 @@ Response:
   "placements": [
     {
       "placement_id": "match_center_header_companion",
+      "block_type": "sponsor_card",
       "served_event": {
         "event_name": "campaign_served",
         "event_id": "served_90eb2a79-20b5-4c39-a62f-b54ec9d39d8b",
@@ -295,6 +296,12 @@ BFF should:
 1. inject the returned creative into the correct page-builder block structure
 2. preserve the returned `campaign_id`, `creative_id`, `placement_id`, and `delivery_id`
 3. ensure Flutter includes those values in later sponsor render/view/click events
+
+Rendering guidance:
+
+- `block_type` is the frontend/page-builder component to render for the placement slot
+- `creative.creative_type` is the creative payload format returned for that slot
+- `allowed_creative_types` is an admin compatibility rule for what creative formats are eligible for a placement
 
 Sponsor follow-up events should include sponsor context as top-level fields where possible:
 
@@ -341,6 +348,7 @@ Example partial-success response:
   "placements": [
     {
       "placement_id": "home_inline_1",
+      "block_type": "sponsor_card",
       "served_event": {
         "event_name": "campaign_served",
         "event_id": "served_123",

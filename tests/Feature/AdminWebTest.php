@@ -6,6 +6,7 @@ use App\Models\AggDailyCampaignMetric;
 use App\Models\AggDailySurfaceMetric;
 use App\Models\Campaign;
 use App\Models\CampaignCreative;
+use App\Models\Placement;
 use App\Models\Sponsor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,6 +116,31 @@ class AdminWebTest extends TestCase
             'code' => 'zamtel',
             'name' => 'Zamtel',
         ]);
+    }
+
+    public function test_authenticated_admin_can_create_placement_with_configured_type_options(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('admin.placements.store'), [
+                'code' => 'home_inline_1',
+                'name' => 'Home Inline 1',
+                'service' => 'news',
+                'surface' => 'home_page',
+                'block_type' => 'sponsor_card',
+                'allowed_creative_types' => ['image_banner', 'sponsor_card'],
+                'position_hint' => 'inline_1',
+                'max_creatives_per_response' => 1,
+                'description' => 'Primary home sponsor slot.',
+                'is_active' => '1',
+            ])
+            ->assertRedirect(route('admin.placements.index'));
+
+        $placement = Placement::query()->where('code', 'home_inline_1')->firstOrFail();
+
+        $this->assertSame('sponsor_card', $placement->block_type);
+        $this->assertSame(['image_banner', 'sponsor_card'], $placement->allowed_creative_types);
     }
 
     public function test_authenticated_admin_can_open_and_update_a_sponsor(): void

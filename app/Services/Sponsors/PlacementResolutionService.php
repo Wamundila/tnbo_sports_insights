@@ -181,6 +181,7 @@ class PlacementResolutionService
 
             return [
                 'placement_id' => $placement->code,
+                'block_type' => $placement->block_type,
                 'served_event' => [
                     'event_name' => 'campaign_served',
                     'event_id' => $servedEventId,
