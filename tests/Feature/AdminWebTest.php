@@ -11,6 +11,7 @@ use App\Models\Sponsor;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -97,6 +98,36 @@ class AdminWebTest extends TestCase
             ->assertSee('Getting Started')
             ->assertSee('Recommended Workflow')
             ->assertSee('Reporting Terms');
+    }
+
+    public function test_authenticated_admin_can_view_edit_and_delete_the_system_log(): void
+    {
+        $user = User::factory()->create();
+        $logPath = storage_path('framework/testing/admin-system-log-test.log');
+
+        File::ensureDirectoryExists(dirname($logPath));
+        File::put($logPath, "first log line\nsecond log line");
+        config()->set('insights.system_log_path', $logPath);
+
+        $this->actingAs($user)
+            ->get(route('admin.system-log.show'))
+            ->assertOk()
+            ->assertSee('System Logs')
+            ->assertSee('first log line');
+
+        $this->actingAs($user)
+            ->put(route('admin.system-log.update'), [
+                'content' => "edited log line\n",
+            ])
+            ->assertRedirect(route('admin.system-log.show'));
+
+        $this->assertSame('edited log line', trim(File::get($logPath)));
+
+        $this->actingAs($user)
+            ->delete(route('admin.system-log.destroy'))
+            ->assertRedirect(route('admin.system-log.show'));
+
+        $this->assertFalse(File::exists($logPath));
     }
 
     public function test_authenticated_admin_can_create_sponsor_from_web_form(): void

@@ -223,6 +223,7 @@
             <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">Dashboard</a>
             <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}" href="{{ route('admin.reports.overview') }}">Reports</a>
             <a class="nav-link {{ request()->routeIs('admin.getting-started') ? 'active' : '' }}" href="{{ route('admin.getting-started') }}">Getting Started</a>
+            <a class="nav-link {{ request()->routeIs('admin.system-log.*') ? 'active' : '' }}" href="{{ route('admin.system-log.show') }}">System Logs</a>
         </nav>
 
         <div class="small text-uppercase text-white-50 mb-2">Inventory</div>

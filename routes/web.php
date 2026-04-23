@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\Admin\GettingStartedController;
 use App\Http\Controllers\Web\Admin\PlacementController;
 use App\Http\Controllers\Web\Admin\ReportController;
 use App\Http\Controllers\Web\Admin\SponsorController;
+use App\Http\Controllers\Web\Admin\SystemLogController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -59,5 +60,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/reports/campaigns', [ReportController::class, 'campaigns'])->name('reports.campaigns');
         Route::get('/reports/content', [ReportController::class, 'content'])->name('reports.content');
         Route::get('/reports/live', [ReportController::class, 'live'])->name('reports.live');
+
+        Route::get('/system-log', [SystemLogController::class, 'show'])->name('system-log.show');
+        Route::put('/system-log', [SystemLogController::class, 'update'])->name('system-log.update');
+        Route::delete('/system-log', [SystemLogController::class, 'destroy'])->name('system-log.destroy');
     });
 });

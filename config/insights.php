@@ -5,6 +5,7 @@ return [
     'api_key_header' => env('INSIGHTS_API_KEY_HEADER', 'X-API-Key'),
     'raw_event_retention_days' => (int) env('INSIGHTS_RAW_EVENT_RETENTION_DAYS', 90),
     'reporting_timezone' => env('INSIGHTS_REPORTING_TIMEZONE', config('app.timezone', 'UTC')),
+    'system_log_path' => env('INSIGHTS_SYSTEM_LOG_PATH', storage_path('logs/laravel.log')),
 
     'placement_block_types' => [
         'sponsor_card' => 'Sponsor Card',
