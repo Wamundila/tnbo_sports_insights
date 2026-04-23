@@ -255,6 +255,39 @@ class AdminWebTest extends TestCase
         Storage::disk('public')->assertExists(str_replace('/storage/', '', $creative->logo_url));
     }
 
+    public function test_authenticated_admin_can_create_image_strip_creative(): void
+    {
+        $user = User::factory()->create();
+        $sponsor = Sponsor::query()->create([
+            'code' => 'partner_strip',
+            'name' => 'Partner Strip',
+            'status' => 'active',
+        ]);
+        $campaign = Campaign::query()->create([
+            'sponsor_id' => $sponsor->id,
+            'code' => 'cmp_2026_strip',
+            'name' => 'Strip Campaign',
+            'status' => 'active',
+            'priority' => 10,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('admin.creatives.store'), [
+                'campaign_id' => $campaign->id,
+                'code' => 'creative_strip_01',
+                'creative_type' => 'image_strip',
+                'title' => 'Strip Creative',
+                'status' => 'active',
+            ])
+            ->assertRedirect(route('admin.creatives.index'));
+
+        $this->assertDatabaseHas('campaign_creatives', [
+            'campaign_id' => $campaign->id,
+            'code' => 'creative_strip_01',
+            'creative_type' => 'image_strip',
+        ]);
+    }
+
     private function fakePngUpload(string $name): UploadedFile
     {
         $path = tempnam(sys_get_temp_dir(), 'png_');

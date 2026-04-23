@@ -31,7 +31,9 @@
                     <div>
                         <label class="form-label">Creative Type</label>
                         <select class="form-select" name="creative_type" required>
-                            <option value="image_banner" @selected(old('creative_type', $editing?->creative_type ?? 'image_banner') === 'image_banner')>image_banner</option>
+                            @foreach ($creativeTypes as $value => $label)
+                                <option value="{{ $value }}" @selected(old('creative_type', $editing?->creative_type ?? 'image_banner') === $value)>{{ $label }} ({{ $value }})</option>
+                            @endforeach
                         </select>
                     </div>
                     <div><label class="form-label">Label Text</label><input class="form-control" name="label_text" value="{{ old('label_text', $editing?->label_text ?? 'Sponsored') }}"></div>

@@ -66,7 +66,7 @@ class CampaignCreativeController extends Controller
         $data = $request->validate([
             'campaign_id' => ['required', 'integer', 'exists:campaigns,id'],
             'code' => ['required', 'string', 'max:100', Rule::unique('campaign_creatives', 'code')->ignore($creative)],
-            'creative_type' => ['required', 'string', Rule::in(['image_banner'])],
+            'creative_type' => ['required', 'string', Rule::in(array_keys(config('insights.creatable_creative_types')))],
             'title' => ['nullable', 'string', 'max:255'],
             'body' => ['nullable', 'string'],
             'label_text' => ['nullable', 'string', 'max:100'],
@@ -108,6 +108,7 @@ class CampaignCreativeController extends Controller
         return [
             'creatives' => $creatives,
             'campaigns' => Campaign::query()->orderBy('name')->get(),
+            'creativeTypes' => config('insights.creatable_creative_types'),
             'filters' => $request->only('campaign_id'),
             'editing' => $editing,
         ];

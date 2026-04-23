@@ -9,15 +9,22 @@ return [
     'placement_block_types' => [
         'sponsor_card' => 'Sponsor Card',
         'image_banner' => 'Image Banner',
+        'image_strip' => 'Image Strip',
         'sponsored_tile' => 'Sponsored Tile',
         'audio_companion' => 'Audio Companion',
     ],
 
     'creative_types' => [
         'image_banner' => 'Image Banner',
+        'image_strip' => 'Image Strip',
         'sponsor_card' => 'Sponsor Card',
         'sponsored_tile' => 'Sponsored Tile',
         'audio_companion' => 'Audio Companion',
+    ],
+
+    'creatable_creative_types' => [
+        'image_banner' => 'Image Banner',
+        'image_strip' => 'Image Strip',
     ],
 
     'allowed_services' => [
